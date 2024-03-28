@@ -12,7 +12,7 @@ Fetch and store historical weather data, specifically temperatures at 2 PM local
 
 1. Clone the repository:
    - Run: `git clone https://github.com/bennomad/historical-weather-data-importer.git`
-   - Then cd into the directory: `cd weather-data-importer`
+   - Then cd into the directory: `cd historical-weather-data-importer`
 
 2. Set up and activate a virtual environment:
 - Windows: `python -m venv venv && venv\Scripts\activate`
