@@ -61,13 +61,44 @@ def fetch_weather_data():
             noon_temperatures.append((local_naive_time, temp))
     return noon_temperatures
 
+def ensure_date_is_unique_key(cursor):
+    # Check if 'date' column is a UNIQUE KEY
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM information_schema.table_constraints AS tc
+        JOIN information_schema.key_column_usage AS kcu
+        ON tc.constraint_catalog = kcu.constraint_catalog
+        AND tc.constraint_schema = kcu.constraint_schema
+        AND tc.constraint_name = kcu.constraint_name
+        WHERE tc.constraint_type = 'UNIQUE'
+        AND tc.table_schema = DATABASE()  # Use the current database
+        AND tc.table_name = 'temperatures'
+        AND kcu.column_name = 'date';
+    """)
+    result = cursor.fetchone()
+    is_unique = result[0] > 0
+
+    # If 'date' column is not a UNIQUE KEY, add it
+    if not is_unique:
+        cursor.execute("""
+            ALTER TABLE temperatures
+            ADD UNIQUE(date);
+        """)
+        print("Added UNIQUE constraint to 'date' column to avoid adding identical data to the database.")
+
 def store_weather_data(noon_temperatures):
     try:
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
+        ensure_date_is_unique_key(cursor)
         for time, api_temperature in noon_temperatures:
             db_temperature = float(api_temperature)
-            query = "INSERT INTO temperatures (date, temperature) VALUES (%s, %s)"
+            # Using ON DUPLICATE KEY UPDATE to update temperature if the date already exists
+            query = """
+                       INSERT INTO temperatures (date, temperature) 
+                       VALUES (%s, %s) 
+                       ON DUPLICATE KEY UPDATE temperature = VALUES(temperature)
+                   """
             cursor.execute(query, (time.date(), db_temperature))
         connection.commit()
         print(f"Successfully stored noon temperatures.")
