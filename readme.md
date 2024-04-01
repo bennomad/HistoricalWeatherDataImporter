@@ -27,8 +27,7 @@ Fetch and store historical weather data, specifically temperatures at 2 PM local
 CREATE DATABASE weather_data;
 USE weather_data;
 CREATE TABLE temperatures (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  date DATE NOT NULL,
+  date DATE NOT NULL PRIMARY KEY,
   temperature DECIMAL(5, 2) NOT NULL
 );
 ```
