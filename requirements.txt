@@ -1,7 +1,0 @@
-openmeteo_requests
-requests_cache
-retry_requests
-mysql-connector-python
-timezonefinder
-pytz
-pandas
